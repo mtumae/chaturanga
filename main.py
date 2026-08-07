@@ -1,8 +1,13 @@
 from fastapi import FastAPI
 
-app = FastAPI()
+app = FastAPI(title="FastAPI Service")
 
 
 @app.get("/")
-async def root():
-    return {"message": "Hello World"}
+def read_root():
+    return {"status": "online", "message": "FastAPI is running inside Docker"}
+
+
+@app.get("/health")
+def health_check():
+    return {"status": "healthy"}
