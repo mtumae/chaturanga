@@ -1,0 +1,9 @@
+[project]
+name = "chaturanga"
+version = "0.1.0"
+description = "Under this monarch, only the bees quarreled to collect the dew; the only feet cut off were those of measurements, and only from Ashtâpada one could learn how to draw up a chaturanga, there was no cutting-off of the four limbs of condemned criminals"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "fastapi[standard]>=0.141.1",
+]
