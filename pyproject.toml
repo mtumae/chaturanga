@@ -5,5 +5,9 @@ description = "Under this monarch, only the bees quarreled to collect the dew; t
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
+    "chess>=1.11.2",
     "fastapi[standard]>=0.141.1",
+    "google-genai>=2.17.0",
+    "python-dotenv>=1.2.2",
+    "sqlmodel>=0.0.39",
 ]
