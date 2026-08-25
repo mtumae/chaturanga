@@ -1,10 +1,10 @@
 from typing import Dict, Set
-
+from sqlmodel import Session
 from fastapi import WebSocket
 
 
 class ConnectionManager:
-    def __init__(self):
+    def __init__(self,):
         self.players: Dict[str, Set[WebSocket]] = {}
         self.spectators: Dict[str, Set[WebSocket]] = {}
 
@@ -37,6 +37,3 @@ class ConnectionManager:
                 await connection.send_json(message)
             except Exception:
                 pass
-
-
-manager = ConnectionManager()
