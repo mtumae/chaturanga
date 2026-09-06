@@ -66,7 +66,7 @@ async def save_game(
 async def end_game(
     session:Session,
     game_id:uuid.UUID,
-    winner_id:uuid.UUID,
+    winner_id:str,
     status:str,
 ):
     stmt = select(Game).where(Game.id==game_id)

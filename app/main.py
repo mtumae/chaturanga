@@ -1,32 +1,30 @@
 
+from contextlib import asynccontextmanager
+from multiprocessing import Value
 import os
 import uuid
 from typing import Dict
 
 import chess
 from dotenv import load_dotenv
-from fastapi import FastAPI, WebSocket
+from fastapi import FastAPI, WebSocket, Depends
 from pydantic.main import BaseModel
 from starlette.exceptions import HTTPException
 from starlette.websockets import WebSocketDisconnect
-from websocket_manager import manager
-from services.ai_engine import generate_move
-from sqlmodel import Session
+from app.websocket_manager import ConnectionManager
+from app.services.ai_engine import generate_move
+from sqlmodel import Session, create_engine
 
 load_dotenv()
 app = FastAPI(title="chaturanga")
-
-
-
-
-
-def get_session():
-    return
-    # with Session(engine) as session:
-    #     yield session
-
+engine = create_engine("sqlite:///database.db")
+manager = ConnectionManager()
 
 game_boards: Dict[str, chess.Board] = {}
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    with Session(engine) as session:
+        yield session
 
 
 class CreateGameRequest(BaseModel):
@@ -74,7 +72,6 @@ async def get_game(game_id: str):
 async def chess_ws(websocket: WebSocket, game_id: str, role: str = "spectator"):
     await manager.connect(game_id, websocket, role=role)
     board = game_boards.setdefault(game_id, chess.Board())
-
     await websocket.send_json(
         {
             "event": "initial_state",
@@ -87,7 +84,6 @@ async def chess_ws(websocket: WebSocket, game_id: str, role: str = "spectator"):
     try:
         while True:
             data = await websocket.receive_json()
-
             if role == "spectator":
                 await websocket.send_json(
                     {"error": "Permission denied. You are a spectator NOT a player."}
@@ -123,9 +119,14 @@ async def chess_ws(websocket: WebSocket, game_id: str, role: str = "spectator"):
                         game_id, {"event": "game_over", "result": board.result()}
                     )
                     break
-                move = await generate_move(board.fen())
+
+                try:
+                    move = await generate_move(board.fen())
+                except Exception as e:
+                    await websocket.send_json({"error": str(e)})
+                    continue
                 if move:
-                    ai_move_uci, commentary = move['ai_move'], move['commentary']
+                    ai_move_uci, commentary = move['ai_move_uci'], move['commentary']
                     board.push(chess.Move.from_uci(ai_move_uci))
                     await manager.broadcast_to_room(
                         game_id,
@@ -134,6 +135,16 @@ async def chess_ws(websocket: WebSocket, game_id: str, role: str = "spectator"):
                             "fen": board.fen(),
                             "last_move": ai_move_uci,
                             "commentary": commentary,
+                        },
+                    )
+                else:
+                    await manager.broadcast_to_room(
+                        game_id,
+                        {
+                            "event": "ai_moved",
+                            "fen": board.fen(),
+                            "last_move": None,
+                            "commentary": "Move not found",
                         },
                     )
 
