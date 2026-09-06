@@ -8,7 +8,6 @@ client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 async def generate_move(fen_string: str):
     """Asynchronously calls Gemini to retrieve a valid move and commentary."""
-    print("Model is thinking...")
 
     # optimized_prompt should look something like:
     # FEN: rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1
@@ -29,17 +28,13 @@ async def generate_move(fen_string: str):
         config={
             "response_mime_type": "application/json",
             "temperature": 0.2,
-            "max_output_tokens": 80,
         },
     )
 
     if response.text:
         import json
         result = json.loads(response.text)
-        print(result)
         return {
-            'ai_move_uci': result['commentary'],
-            'commentary': result['move']
+            'ai_move_uci': result['move'],
+            'commentary': result['commentary']
         }
-    else:
-        return None
