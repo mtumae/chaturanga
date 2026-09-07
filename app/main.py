@@ -126,7 +126,8 @@ async def chess_ws(websocket: WebSocket, game_id: str, role: str = "spectator"):
                     await websocket.send_json({"error": str(e)})
                     continue
                 if move:
-                    ai_move_uci, commentary = move['ai_move_uci'], move['commentary']
+                    ai_move_uci, commentary, expression = move['ai_move_uci'], move['commentary'], move['expression']
+                    print(f"Expression: {expression}")
                     board.push(chess.Move.from_uci(ai_move_uci))
                     await manager.broadcast_to_room(
                         game_id,
@@ -135,6 +136,7 @@ async def chess_ws(websocket: WebSocket, game_id: str, role: str = "spectator"):
                             "fen": board.fen(),
                             "last_move": ai_move_uci,
                             "commentary": commentary,
+                            "expression": expression,
                         },
                     )
                 else:
@@ -145,6 +147,7 @@ async def chess_ws(websocket: WebSocket, game_id: str, role: str = "spectator"):
                             "fen": board.fen(),
                             "last_move": None,
                             "commentary": "Move not found",
+                            "expression": None,
                         },
                     )
 

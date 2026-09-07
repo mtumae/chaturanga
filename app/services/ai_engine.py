@@ -20,10 +20,11 @@ async def generate_move(fen_string: str):
         Task: Respond with JSON only containing:
         1. "move": Your next move in UCI notation (e.g., "g1f3", "e7e5").
         2. "commentary": A short sentence strategic remark.
+        3. "expression": Pick one of the expressions "Laughing", "Worried", "Angry", or "Skeptical" to go along with your thought process.
         """
 
     response = client.models.generate_content(
-        model="gemini-3.6-flash",
+        model="gemini-3.1-flash-lite",
         contents={"text": prompt},
         config={
             "response_mime_type": "application/json",
@@ -36,5 +37,6 @@ async def generate_move(fen_string: str):
         result = json.loads(response.text)
         return {
             'ai_move_uci': result['move'],
-            'commentary': result['commentary']
+            'commentary': result['commentary'],
+            'expression': result['expression'],
         }
