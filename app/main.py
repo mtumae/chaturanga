@@ -15,8 +15,11 @@ from app.websocket_manager import ConnectionManager
 from app.services.ai_engine import generate_move
 from sqlmodel import Session, create_engine
 
+from app.routers import auth as auth_router
+
 load_dotenv()
 app = FastAPI(title="chaturanga")
+app.include_router(auth_router.router)
 engine = create_engine("sqlite:///database.db")
 manager = ConnectionManager()
 

@@ -11,4 +11,8 @@ wheels/
 .env
 
 .vscode
+
 .pytest_cache
+*.pyc
+.git
+.env

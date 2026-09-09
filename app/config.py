@@ -18,7 +18,7 @@ class Settings(BaseSettings):
             return [p.strip() for p in v.split(",") if p.strip()]
         return v
 
-    model_config = SettingsConfigDict(env_file=".env", case_sensitive=False)
+    model_config = SettingsConfigDict(env_file=".env", case_sensitive=False, extra="ignore")
 
 
 @lru_cache
