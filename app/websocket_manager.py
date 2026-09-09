@@ -4,9 +4,7 @@ from fastapi import WebSocket
 
 
 class ConnectionManager:
-    def __init__(
-        self,
-    ):
+    def __init__(self):
         self.players: Dict[str, Set[WebSocket]] = {}
         self.spectators: Dict[str, Set[WebSocket]] = {}
 
@@ -33,12 +31,9 @@ class ConnectionManager:
         all_connections = self.players.get(game_id, set()).union(
             self.spectators.get(game_id, set())
         )
-
         for connection in list(all_connections):
             try:
                 await connection.send_json(message)
-            except Exception as e:
-                print(
-                    f"[websocket_manager:broadcast_to_room]: Error broadcasting message: {str(e)}"
-                )
-                pass
+            except Exception:
+                self.disconnect(game_id, connection, role="player")
+                self.disconnect(game_id, connection, role="spectator")

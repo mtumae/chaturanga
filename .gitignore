@@ -11,5 +11,11 @@ wheels/
 .env
 
 
+.pytest_cache
+*.pyc
+.git
+.env
+
+
 
 .gitignore
