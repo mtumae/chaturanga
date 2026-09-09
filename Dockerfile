@@ -1,43 +1,40 @@
-# ==========================================
-# STAGE 1: Builder
-# ==========================================
-FROM python:3.14-rc-slim AS builder
+FROM python:3.11-slim-bookworm
 
-WORKDIR /build
+# 1. Grab the official standalone uv binary from Astral
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-# Install build tools if needed for C-extensions
+# 2. Install Stockfish and curl via apt
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
+    stockfish \
+    curl \
     && rm -rf /var/lib/apt/lists/*
-
-COPY requirements.txt .
-
-# Build wheels for all dependencies
-RUN pip wheel --no-cache-dir --wheel-dir /build/wheels -r requirements.txt
-
-
-# ==========================================
-# STAGE 2: Runtime
-# ==========================================
-FROM python:3.14-rc-slim AS runtime
-
-# Create non-root user
-RUN useradd --create-home --shell /bin/bash appuser
 
 WORKDIR /app
 
-# Copy compiled wheels and install
-COPY --from=builder /build/wheels /wheels
-RUN pip install --no-cache-dir /wheels/* && rm -rf /wheels
+# 3. Optimize uv settings for Docker:
+# - Compile bytecode during install so app boots faster
+# - Copy mode instead of symlinks
+# - Disable dev dependencies
+ENV UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy \
+    STOCKFISH_PATH=/usr/games/stockfish \
+    PATH="/app/.venv/bin:$PATH"
 
-# Copy application code
-COPY ./app ./app
+# 4. Copy dependency specifications first to leverage Docker layer caching
+COPY pyproject.toml uv.lock ./
 
-# Set permissions
-RUN chown -R appuser:appuser /app
-USER appuser
+# 5. Install dependencies into /app/.venv without installing root app yet
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-install-project --no-dev
+
+# 6. Copy source code
+COPY . .
+
+# 7. Sync the project itself
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-dev
 
 EXPOSE 8000
 
-# Exec form CMD for FastAPI
-CMD ["fastapi", "run", "app/main.py", "--port", "8000", "--host", "0.0.0.0"]
+# 8. Run uvicorn directly from the virtualenv (already on PATH)
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

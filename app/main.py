@@ -1,3 +1,5 @@
+from contextlib import asynccontextmanager
+from multiprocessing import Value
 import os
 import uuid
 from typing import Dict, List, Optional, Literal
@@ -37,6 +39,12 @@ app = FastAPI(title="chaturanga", lifespan=lifespan)
 
 
 game_boards: Dict[str, chess.Board] = {}
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    with Session(engine) as session:
+        yield session
 
 
 class CreateGameRequest(BaseModel):
@@ -134,7 +142,6 @@ async def get_paginated_games(
 async def chess_ws(websocket: WebSocket, game_id: str, role: str = "spectator"):
     await manager.connect(game_id, websocket, role=role)
     board = game_boards.setdefault(game_id, chess.Board())
-
     await websocket.send_json(
         {
             "event": "initial_state",

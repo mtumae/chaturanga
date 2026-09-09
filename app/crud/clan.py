@@ -1,3 +1,4 @@
+import uuid
 from typing import Optional, List
 from fastapi.exceptions import HTTPException
 from sqlmodel import select
@@ -23,7 +24,7 @@ async def create_clan(
     session: AsyncSession,
     name: str,
     profile_url: Optional[str],
-    user_id: str,
+    user_id: uuid.UUID,
     description: str,
     # profile_url:Optional[str],
 ) -> Clan:
@@ -39,7 +40,7 @@ async def create_clan(
     return clan
 
 
-async def join_clan(session: AsyncSession, user_id: str, clan_id: str):
+async def join_clan(session: AsyncSession, user_id: uuid.UUID, clan_id: uuid.UUID):
     player = await session.get(Player, user_id)
     if player and player.clan_id:
         raise Exception("Player is already in a clan.")
@@ -52,7 +53,7 @@ async def join_clan(session: AsyncSession, user_id: str, clan_id: str):
 
 async def leave_clan(
     session: AsyncSession,
-    user_id: str,
+    user_id: uuid.UUID,
 ):
     player = await session.get(Player, user_id)
     if player and player.clan_id is None:
@@ -66,7 +67,7 @@ async def leave_clan(
 
 async def remove_player(
     session: AsyncSession,
-    user_id: str,
+    user_id: uuid.UUID,
 ):
     player = await session.get(Player, user_id)
     if player and player.clan_id:
@@ -78,7 +79,7 @@ async def remove_player(
 
 async def get_clan(
     session: AsyncSession,
-    clan_id: str,
+    clan_id: uuid.UUID,
 ):
     stmt = select(Clan).where(Clan.id == clan_id)
     res = await session.exec(stmt)
