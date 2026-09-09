@@ -123,7 +123,8 @@ async def chess_ws(websocket: WebSocket, game_id: str, role: str = "spectator"):
                 try:
                     move = await generate_move(board.fen())
                 except Exception as e:
-                    await websocket.send_json({"error": str(e)})
+                    print(f"[chess_ws:generate_move]: Error generating move: {e}")
+                    await websocket.send_json({"error": "Failed to generate move."})
                     continue
                 if move:
                     ai_move_uci, commentary, expression = move['ai_move_uci'], move['commentary'], move['expression']

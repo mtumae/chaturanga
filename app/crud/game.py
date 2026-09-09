@@ -19,7 +19,7 @@ class GameStatus(str, Enum):
 
 async def create_game(
     session:Session,
-    player_id:uuid.UUID,
+    player_id:str, # uuid.UUID,
 ):
     game = Game(
         fen=None,
