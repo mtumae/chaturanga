@@ -9,6 +9,7 @@ router = APIRouter(prefix="/api", tags=["protected"])
 
 @router.get("/me")
 def me(state: Annotated[RequestState, Depends(require_auth)]):
+    assert state.payload is not None  # guaranteed by require_auth
     return {
         "user_id": state.payload["sub"],
         "session_id": state.payload.get("sid"),

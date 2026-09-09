@@ -3,6 +3,7 @@ from clerk_backend_api.security.types import AuthStatus, RequestState
 from fastapi.testclient import TestClient
 
 from app.auth import require_auth
+from app.config import get_settings
 from app.main import app
 
 def _fake_auth() -> RequestState:
@@ -25,6 +26,7 @@ def test_me_endpoint():
 
 def test_unauthenticated_returns_401():
     app.dependency_overrides = {}
+    get_settings.cache_clear()
     client = TestClient(app)
     response = client.get("/api/me")
     assert response.status_code == 401
