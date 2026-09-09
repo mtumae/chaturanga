@@ -31,9 +31,9 @@ class ConnectionManager:
         all_connections = self.players.get(game_id, set()).union(
             self.spectators.get(game_id, set())
         )
-
         for connection in list(all_connections):
             try:
                 await connection.send_json(message)
             except Exception:
-                pass
+                self.disconnect(game_id, connection, role="player")
+                self.disconnect(game_id, connection, role="spectator")
