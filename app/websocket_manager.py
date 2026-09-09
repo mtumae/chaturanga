@@ -4,7 +4,9 @@ from fastapi import WebSocket
 
 
 class ConnectionManager:
-    def __init__(self,):
+    def __init__(
+        self,
+    ):
         self.players: Dict[str, Set[WebSocket]] = {}
         self.spectators: Dict[str, Set[WebSocket]] = {}
 
@@ -35,5 +37,8 @@ class ConnectionManager:
         for connection in list(all_connections):
             try:
                 await connection.send_json(message)
-            except Exception:
+            except Exception as e:
+                print(
+                    f"[websocket_manager:broadcast_to_room]: Error broadcasting message: {str(e)}"
+                )
                 pass

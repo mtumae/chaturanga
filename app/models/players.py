@@ -29,7 +29,7 @@ class Player(SQLModel, table=True):
             nullable=True,
         ),
     )
-    ranking_id: Optional[uuid.UUID] = Field(
+    ranking_id: Optional[str] = Field(
         default=None,
         sa_column=Column(
             "ranking_id",
