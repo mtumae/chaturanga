@@ -4,10 +4,9 @@ from sqlmodel import Field, SQLModel, Relationship, Enum, Column, JSON
 from typing import Optional, List
 
 
-
 class Game(SQLModel, table=True):
     __tablename__ = "games"
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
     status: str = Field(default="pending", index=True)
 
     # Clock configuration
@@ -22,8 +21,11 @@ class Game(SQLModel, table=True):
 
     # Timestamps
     created_at: datetime = Field(default_factory=datetime.now)
+    updated_at: datetime = Field(default_factory=datetime.now)
     ended_at: Optional[datetime] = Field(default=None)
 
     # Outcome summary
     winner_id: Optional[str] = Field(default=None, foreign_key="players.id")
-    termination_reason: Optional[str] = Field(default=None)  # "checkmate", "timeout", "resignation", "bingo"
+    termination_reason: Optional[str] = Field(
+        default=None
+    )  # "checkmate", "timeout", "resignation", "bingo"

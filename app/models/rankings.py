@@ -6,7 +6,7 @@ from typing import Optional, List
 
 class Ranking(SQLModel, table=True):
     __tablename__ = "rankings"
-    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
     player_id: str = Field(foreign_key="players.id", index=True)
 
     rating: float = Field(default=1200.0, index=True)

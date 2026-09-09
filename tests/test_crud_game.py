@@ -200,7 +200,7 @@ class TestSaveGame:
         with pytest.raises(Exception, match="Game not found"):
             await save_game(
                 session=sync_session,
-                game_id=uuid.uuid4(),
+                game_id=str(uuid.uuid4()),
                 player_id=sample_player_sync.id,
                 fen="fen",
                 moves_history=[],
@@ -279,7 +279,7 @@ class TestEndGame:
         with pytest.raises(Exception, match="Game not found"):
             await end_game(
                 session=sync_session,
-                game_id=uuid.uuid4(),
+                game_id=str(uuid.uuid4()),
                 winner_id=sample_player_sync.id,
                 status=GameStatus.COMPLETED,
             )
